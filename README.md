@@ -21,7 +21,7 @@ I learned a lot from the blog. It's fantastic and very suitable for beginners to
 
 The layout of the files is shown below:
 
-![Image text](imgs/files_layout.png)
+![Image text](imgs/file_layout.png)
 
 ### Parameters setting:
 

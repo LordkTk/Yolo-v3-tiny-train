@@ -27,21 +27,27 @@ The layout of the files is shown below:
 
 After experimenting with several groups of hyperparameters, i found that the most desirable results i got was with: 
 
---initial learning rate = 5e-5; 
+--initial learning rate = 6e-5; 
  
 --focal loss parameter: alpha = 0.25, gamma = 2; 
  
 --epoch_num: warm-up: 2, first-stage: 4, second-stage: 20. 
  
-The model gets an mAP of 23.6 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
+The model gets an mAP of 27.7 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
 
 ### Results:
 
-Some of the results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.3):
+Some of the results are shown below (with conf_threshold = 0.6 and iou_threshold = 0.3):
+
+![Image text](imgs/dog.png)
 
 The bicycle is missed... my trained model seems to have difficulty in identifying bicycle.
 
+![Image text](imgs/person.png)
+
 The horse is recognized as sheep mistakenly...
+
+![Image text](imgs/car.png)
 
 The car detection is much better than the one in my yolo-v3 repo (because of the different upsample methods between tf and darknet, see it in detail in my repo). 
 

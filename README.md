@@ -15,4 +15,3 @@ Function of the files:
 5. 'train.py': run this file to train yolo. There are lots of hyperparameters and may need to be modified according to your own dataset.
 
 The layout of the files is shown below:
-![Image text](imgs/file_layout.png)

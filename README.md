@@ -45,7 +45,7 @@ The bicycle is missed... my trained model seems to have difficulty in identifyin
 
 ![Image text](imgs/person.png)
 
-The horse is recognized as sheep mistakenly...
+The horse and dog are recognized as sheep mistakenly...
 
 ![Image text](imgs/car.png)
 

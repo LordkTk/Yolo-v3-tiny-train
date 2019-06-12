@@ -1,7 +1,7 @@
 # Yolo-v3-tiny-train
 train tiny-yolo-v3 for your own dataset
 
-Important reference: https://link.zhihu.com/?target=http%3A//machinethink.net/blog/object-detection/
+Important reference: http://machinethink.net/blog/object-detection/
 
 I learned a lot from this blog. It's fantastic and very suitable for beginners to know about yolo and its training. But during my own implementation i found there are two mistakes in the blog that will greatly influence yolo's training:
 1. yolo uses warm-up during training, but the purpose is to let the model learn with a small rate in the begining, to avoid gradient explosion, not to 'encourage predictions to start matching the anchors for the detectors'. And if you do as the blog says, i.e., 'adding a fake ground-truth box in the center of each cell during early training steps', you will have great difficulty in reducing the loss.
@@ -15,3 +15,17 @@ Function of the files:
 5. 'train.py': run this file to train yolo. There are lots of hyperparameters and may need to be modified according to your own dataset.
 
 The layout of the files is shown below:
+
+![Image text](imgs/files_layout.png)
+
+After experimenting with several groups of hyperparameters, i found that the most desirable results i got was with: 
+
+--initial learning rate = 5e-5; 
+ 
+--focal loss parameter: alpha = 0.25, gamma = 2; 
+ 
+--epoch_num: warm-up: 2, first-stage: 4, second-stage: 20. 
+ 
+The model gets an mAP of 23.6 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
+
+Some of the results are shown below:

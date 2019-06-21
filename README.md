@@ -33,7 +33,7 @@ After experimenting with several groups of hyperparameters, i found that the mos
  
 --epoch_num: warm-up: 2, first-stage: 4, second-stage: 20. 
  
-The model gets an mAP of 27.7 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
+The model gets an mAP of 32.8 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
 
 ### Results:
 

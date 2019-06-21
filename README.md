@@ -37,7 +37,7 @@ The model gets an mAP of 32.8 for test-dataset (i get it by randomly dividing th
 
 ### Results:
 
-Some of the results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.3):
+Some of the test results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.3):
 
 ![Image text](imgs/0.jpg)
 

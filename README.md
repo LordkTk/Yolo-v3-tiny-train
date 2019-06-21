@@ -25,7 +25,7 @@ The layout of the files is shown below:
 
 ### Parameters setting:
 
-After experimenting with several groups of hyperparameters, i found that the most desirable results i got was with: 
+After experimenting with several groups of hyperparameters, i found that desirable results can be obtained with: 
 
 --initial learning rate = 5e-4; 
  
@@ -33,22 +33,22 @@ After experimenting with several groups of hyperparameters, i found that the mos
  
 --epoch_num: warm-up: 2, first-stage: 4, second-stage: 20. 
  
-The model gets an mAP of 32.8 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the model can get much better results, but the process of adjusting parameters can be quite suffering.
+The model gets an mAP of 32.8 for test-dataset (i get it by randomly dividing the full dataset to train and test parts, and the test part has 1000 imgs). i believe the present model can get much better results, but the process of adjusting parameters can be quite suffering. Besides, its performance can also be improved by using multiscale-training and data augmentation.
 
 ### Results:
 
 Some of the results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.3):
 
-![Image text](imgs/dog.jpg)
+![Image text](imgs/0.jpg)
 
-The bicycle is missed... my trained model seems to have difficulty in identifying bicycle.
+![Image text](imgs/1.jpg)
 
-![Image text](imgs/person.jpg)
+![Image text](imgs/2.jpg)
 
-The horse is recognized as sheep mistakenly...
+![Image text](imgs/3.jpg)
 
-![Image text](imgs/car.jpg)
+![Image text](imgs/4.jpg)
 
-The car detection is much better than the one in my yolo-v3 repo (because of the different upsample methods between tf and darknet, see it in detail in my repo). 
+The detection results are much better than the those in my yolo-v3 repo (because of the different upsample methods between tf and darknet probably, see it in detail in my repo). 
 
-Note it again that the model's performance can still be improved by adjusting parameters carefully.
+Note it again that the model's performance can still be improved by adjusting parameters carefully, using multi-scale training and data augmentation.

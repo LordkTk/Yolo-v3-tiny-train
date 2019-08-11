@@ -27,17 +27,17 @@ The layout of the files is shown below:
 
 After experimenting with several groups of hyperparameters, i found that desirable results can be obtained with: 
 
---initial learning rate = 5e-4; 
+--initial learning rate = 2e-4; 
  
---focal loss parameter: alpha = 0.25, gamma = 2; 
+--focal loss parameter: alpha = 1, gamma = 2; 
  
---epoch_num: warm-up: 2, first-stage: 4, second-stage: 20. 
+--epoch_num: warm-up: 2, first-stage: 3, second-stage: 100. 
  
 The model is trained on the VOC 2007+2012 trainval dataset and gets an mAP of 53.10 on the test dataset of VOC 2007. The model's performance can be improved by adjusting parameters carefully, but such improvement is little (since the structure is too simple (only 7 conv layers in 'body'), which means the capacity of the net is low and the net is underfitting). 
 
 ### Results:
 
-Some of the test results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.3):
+Some of the test results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.5):
 
 ![Image text](imgs/0.jpg)
 

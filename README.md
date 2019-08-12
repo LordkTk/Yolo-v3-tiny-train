@@ -37,7 +37,7 @@ The model is trained on the VOC 2007+2012 trainval dataset and gets an mAP of 53
 
 ### Results:
 
-Some of the test results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.5):
+Some of the test results are shown below (with conf_threshold = 0.4 and iou_threshold = 0.4):
 
 ![Image text](imgs/sample-1.jpg)
 

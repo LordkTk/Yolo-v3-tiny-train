@@ -39,16 +39,12 @@ The model is trained on the VOC 2007+2012 trainval dataset and gets an mAP of 53
 
 Some of the test results are shown below (with conf_threshold = 0.5 and iou_threshold = 0.5):
 
-![Image text](imgs/0.jpg)
+![Image text](imgs/sample-1.jpg)
 
-![Image text](imgs/1.jpg)
+![Image text](imgs/sample-2.jpg)
 
-![Image text](imgs/2.jpg)
+![Image text](imgs/sample-3.jpg)
 
-![Image text](imgs/3.jpg)
-
-![Image text](imgs/4.jpg)
+![Image text](imgs/sample-4.jpg)
 
 The detection results are much better than the those in my yolo-v3 repo (because of the different upsample methods between tf and darknet probably, see it in detail in my repo). 
-
-Note it again that the model's performance can still be improved by adjusting parameters carefully, using multi-scale training and data augmentation.

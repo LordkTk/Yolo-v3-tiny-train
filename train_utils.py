@@ -250,3 +250,135 @@ def cal_ignore_mask(bbox_pre, bbox_gr, anchor, cellNum):
     #[N, 13, 13, 3]
     max_iou = tf.reduce_max(iou, axis=-1)
     return tf.cast(max_iou < 0.5, tf.float32)
+
+def decode(out, imgSize, num_classes=80, anchorTotal=None):
+    bboxesTotal = []; obj_probsTotal = []; class_probsTotal = []
+    for i, detection_feat in enumerate(out):
+        _, H, W, _ = detection_feat.get_shape().as_list()
+        anchors = anchorTotal[(2-i)*3:(2-i)*3+3, :]
+        num_anchors = len(anchors)
+        
+        detetion_results = tf.reshape(detection_feat, [-1, H * W, num_anchors, num_classes + 5])
+        
+        bbox_xy = tf.nn.sigmoid(detetion_results[:, :, :, :2])
+        bbox_wh = tf.exp(detetion_results[:, :, :, 2:4])
+        obj_probs = tf.nn.sigmoid(detetion_results[:, :, :, 4])
+        class_probs = tf.nn.sigmoid(detetion_results[:, :, :, 5:])
+    
+        anchors = tf.constant(anchors, dtype=tf.float32)
+    
+        height_ind = tf.range(H, dtype=tf.float32)
+        width_ind = tf.range(W, dtype=tf.float32)
+        
+        x_offset, y_offset = tf.meshgrid(height_ind, width_ind)
+        x_offset = tf.reshape(x_offset, [1, -1, 1])
+        y_offset = tf.reshape(y_offset, [1, -1, 1])
+        
+        bbox_x = (bbox_xy[:, :, :, 0] + x_offset) / W
+        bbox_y = (bbox_xy[:, :, :, 1] + y_offset) / H
+        bbox_w = bbox_wh[:, :, :, 0] * anchors[:, 0] / imgSize * 0.5
+        bbox_h = bbox_wh[:, :, :, 1] * anchors[:, 1] / imgSize * 0.5
+
+        bboxes = tf.stack([bbox_x - bbox_w, bbox_y - bbox_h, bbox_x + bbox_w, bbox_y + bbox_h], axis=3)
+        bboxesTotal.append(bboxes)
+        obj_probsTotal.append(obj_probs)
+        class_probsTotal.append(class_probs)
+    bboxes = tf.concat(bboxesTotal, axis=1)
+    obj_probs = tf.concat(obj_probsTotal, axis=1)
+    class_probs = tf.concat(class_probsTotal, axis=1)
+    return bboxes, obj_probs, class_probs
+
+def post_process(sess, x, is_training, out, pathList, imgSize, num_classes, class_names, anchors, save_weights=False):
+    def arg_max(x):
+        xmax = 0
+        id1 = 0
+        id2 = 0
+        w1, w2 = x.shape
+        for i in range(w1):
+            for j in range(w2):
+                if x[i, j]>xmax:
+                    xmax = x[i,j]
+                    id1 = i
+                    id2 = j
+        return id1, id2
+    imgTotal = []
+    imgSrcTotal = []
+    for path in pathList:
+        imgSrc = cv2.imread(path, 1)
+        img = np.float32(cv2.cvtColor(imgSrc, cv2.COLOR_BGR2RGB)/255)
+        img = cv2.resize(img, (imgSize, imgSize))[np.newaxis, :,:,:]
+        imgTotal.append(img)
+        imgSrcTotal.append(imgSrc)
+    imgTotal = np.concatenate(imgTotal, axis=0)
+        
+    bboxTotal, obj_probsTotal, class_probsTotal = sess.run(decode(out, imgSize, num_classes, anchorTotal=anchors), feed_dict={x:imgTotal, is_training:False})
+    if save_weights:
+        saver = tf.train.Saver()
+        saver.save(sess, './Weights/weightsInit.ckpt')
+    
+    for i, imgSrc in enumerate(imgSrcTotal):
+        H, W, _ = imgSrc.shape
+        #[:, 3]; [:, 3, 4]
+        class_name = np.argmax(class_probsTotal[i], axis = 2)
+        class_probs = np.max(class_probsTotal[i], axis = 2)
+        obj_probs = obj_probsTotal[i]
+        bbox = bboxTotal[i]
+        bbox[bbox>1] = 1
+        bbox[bbox<0] = 0
+        confidence = class_probs * obj_probs
+        conf = confidence.copy()
+        confidence[confidence<0.4] = 0 ######################################################################################
+        
+        det_indTotal = []
+        while (np.max(confidence)!=0):
+            id1, id2 = arg_max(confidence)
+            bbox1_area = (bbox[id1, id2,3]-bbox[id1, id2,1])*(bbox[id1, id2,2]-bbox[id1, id2,0])
+            sign = 0
+            for coor in det_indTotal:
+                if coor == None:
+                    det_indTotal.append([id1, id2])
+                else:
+                    xi1 = max(bbox[id1, id2, 0], bbox[coor[0], coor[1], 0])
+                    yi1 = max(bbox[id1, id2, 1], bbox[coor[0], coor[1], 1])
+                    xi2 = min(bbox[id1, id2, 2], bbox[coor[0], coor[1], 2])
+                    yi2 = min(bbox[id1, id2, 3], bbox[coor[0], coor[1], 3])
+                    int_area = (max(yi2, 0) - max(yi1, 0)) * (max(xi2, 0) - max(xi1, 0))
+                    bbox2_area = (bbox[coor[0],coor[1],3]-bbox[coor[0],coor[1],1]) * (bbox[coor[0],coor[1],2]-bbox[coor[0],coor[1],0])
+                    uni_area = bbox1_area + bbox2_area - int_area
+                    iou = int_area/uni_area
+                    if iou>0.4: ###########################################################################################
+                        sign = 1
+                        break
+            if sign==0:
+                det_indTotal.append([id1, id2]) 
+            confidence[id1, id2] = 0
+            
+        depict = []
+        for [id1, id2] in det_indTotal:
+            x1,y1,x2,y2 = bbox[id1, id2]
+            x1 = int(x1*W); x2 = int(x2*W); y1 = int(y1*H); y2 = int(y2*H)
+            name = class_names[class_name[id1, id2]]
+            depict.append([x1,y1,x2,y2])
+            cv2.rectangle(imgSrc, (x1,y1), (x2,y2), (255,0,0), 2)
+            
+            y = y1-8 if y1-8>8 else y1+8
+            cv2.putText(imgSrc, '%s %.2f' %(name, conf[id1, id2]), (x1, y), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,255,0), 2)
+            
+        cv2.imshow('%d' %i, imgSrc)
+        cv2.imwrite('./test_imgs/%d.jpg' %i, imgSrc, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    
+def build_net(x, is_training):
+    with tf.variable_scope('body'):
+        net, route1, route2 = build_darknet(x, is_training)
+    with tf.variable_scope('head'):
+        out = build_detnet(net, route1, route2, is_training)
+    return out
+def load_img(path, batchList, imgSize):
+    imgbatch = []
+    for filename in batchList:
+        filepath = os.path.join(path, filename)
+        img = cv2.resize(cv2.imread(filepath, 1), (imgSize, imgSize))
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)[np.newaxis,:,:,:].astype(np.float32) / 255
+        imgbatch.append(img)
+    imgbatch = np.concatenate(imgbatch, axis=0)
+    return imgbatch
